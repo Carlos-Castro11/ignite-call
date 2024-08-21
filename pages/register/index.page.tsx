@@ -6,6 +6,8 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
+import { api } from '@/src/lib/axios'
+
 import { Container, Form, FormError, Header } from './styles'
 
 const registerFormSchema = z.object({
@@ -18,10 +20,7 @@ const registerFormSchema = z.object({
     .transform((username) => username.toLowerCase()),
   name: z
     .string()
-    .min(3, { message: 'O nome precisa ter pelo menos 3 letras.' })
-    .regex(/^([a-z]+)$/i, {
-      message: 'O nome pode ter apenas letras.',
-    }),
+    .min(3, { message: 'O nome precisa ter pelo menos 3 letras.' }),
 })
 
 type registerFormType = z.infer<typeof registerFormSchema>
@@ -43,8 +42,15 @@ export default function Register() {
       setValue('username', String(router.query.username))
   }, [router.query?.username, setValue])
 
-  const handleRegister = (data: registerFormType) => {
-    console.log(data)
+  async function handleRegister(data: registerFormType) {
+    try {
+      await api.post('/users', {
+        name: data.name,
+        username: data.username,
+      })
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   return (
